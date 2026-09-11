@@ -94,6 +94,10 @@ resource "google_storage_bucket" "gcs_audit_logging_bucket" {
     enabled = true
   }
 
+  encryption {
+    default_kms_key_name = google_kms_crypto_key.storage_encryption_cryptokey.id
+  }
+
   lifecycle_rule {
     action {
       type = "Delete"
@@ -431,29 +435,10 @@ resource "google_bigquery_table" "student_onboarding_staged_table" {
 
 # ------------------------------------------------------------------------------
 # Task 1.5: BigQuery Row-Level Security (RLS) Row Access Policies
+# In Google Cloud BigQuery, Row Access Policies are enforced via SQL DDL scripts.
+# Declarative specifications are maintained in: terraform/rls_policies.sql
+# Policies:
+#  1. lsa_assigned_students_isolation (SESSION_USER() filter on assigned LSA)
+#  2. regional_coordinator_district_isolation (District mapping filter)
+#  3. compliance_officer_full_audit (Unrestricted TRUE filter for legal/compliance)
 # ------------------------------------------------------------------------------
-# Policy 1: Learning Support Assistants can ONLY inspect student records explicitly assigned to them
-resource "google_bigquery_row_access_policy" "lsa_assigned_students_row_access_policy" {
-  project     = var.google_cloud_project_identifier
-  dataset_id  = google_bigquery_dataset.d1_staged_enforced_dataset.dataset_id
-  table_id    = google_bigquery_table.student_onboarding_staged_table.table_id
-  policy_tag  = "lsa_assigned_students_isolation"
-  filter_predicate = "assigned_learning_support_assistant_identifier = SESSION_USER()"
-
-  grantees = [
-    "group:${var.authorized_learning_support_assistant_group_email}"
-  ]
-}
-
-# Policy 2: Compliance Officers and Internal Auditors have unconstrained access across all rows
-resource "google_bigquery_row_access_policy" "compliance_officer_full_audit_row_access_policy" {
-  project     = var.google_cloud_project_identifier
-  dataset_id  = google_bigquery_dataset.d1_staged_enforced_dataset.dataset_id
-  table_id    = google_bigquery_table.student_onboarding_staged_table.table_id
-  policy_tag  = "compliance_officer_full_audit"
-  filter_predicate = "TRUE"
-
-  grantees = [
-    "group:${var.authorized_compliance_officer_group_email}"
-  ]
-}
