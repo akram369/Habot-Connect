@@ -13,14 +13,13 @@ import re
 from typing import Any, Dict
 
 from django.utils import timezone
-from rest_framework import serializers
-
 from onboarding.dcyn_library import (
     DCYN_STUDENT_QUESTION_CATALOG,
     DCYNTransformer,
     DCYNValidationError,
 )
 from onboarding.models import StudentOnboardingProfile
+from rest_framework import serializers
 
 # International E.164 Telephone Format Regex (+ followed by 7 to 15 digits)
 E164_PHONE_REGEX = re.compile(r"^\+[1-9]\d{6,14}$")
@@ -29,15 +28,17 @@ E164_PHONE_REGEX = re.compile(r"^\+[1-9]\d{6,14}$")
 LEGAL_NAME_REGEX = re.compile(r"^[A-Za-z\s\'-]{2,100}$")
 
 # Disposable / Temporary Email Domains Blocklist (Zero Tolerance)
-DISPOSABLE_EMAIL_DOMAINS = frozenset({
-    "mailinator.com",
-    "tempmail.com",
-    "guerrillamail.com",
-    "10minutemail.com",
-    "throwawaymail.com",
-    "sharklasers.com",
-    "dispostable.com",
-})
+DISPOSABLE_EMAIL_DOMAINS = frozenset(
+    {
+        "mailinator.com",
+        "tempmail.com",
+        "guerrillamail.com",
+        "10minutemail.com",
+        "throwawaymail.com",
+        "sharklasers.com",
+        "dispostable.com",
+    }
+)
 
 
 class StudentOnboardingSerializer(serializers.ModelSerializer):
@@ -193,21 +194,26 @@ class StudentOnboardingSerializer(serializers.ModelSerializer):
         emergency_name = attrs.get("emergency_contact_full_name", "").strip().lower()
 
         if parent_name and emergency_name and parent_name == emergency_name:
-            raise serializers.ValidationError({
-                "emergency_contact_full_name": (
-                    "Cross-field violation: Emergency contact must be distinct from primary parent."
-                )
-            })
+            raise serializers.ValidationError(
+                {
+                    "emergency_contact_full_name": (
+                        "Cross-field violation: Emergency contact "
+                        "must be distinct from primary parent."
+                    )
+                }
+            )
 
         parent_phone = attrs.get("parent_phone_number", "").strip()
         emergency_phone = attrs.get("emergency_contact_phone_number", "").strip()
 
         if parent_phone and emergency_phone and parent_phone == emergency_phone:
-            raise serializers.ValidationError({
-                "emergency_contact_phone_number": (
-                    "Cross-field violation: Emergency phone must be distinct from parent phone."
-                )
-            })
+            raise serializers.ValidationError(
+                {
+                    "emergency_contact_phone_number": (
+                        "Cross-field violation: Emergency phone must be distinct from parent phone."
+                    )
+                }
+            )
 
         raw_dcyn_container = attrs.pop("dcyn_indicators", {}) or {}
 
@@ -220,12 +226,14 @@ class StudentOnboardingSerializer(serializers.ModelSerializer):
                 raw_val = attrs.get(field_name)
 
             if raw_val is None:
-                raise serializers.ValidationError({
-                    field_name: (
-                        f"Missing mandatory DCYN indicator: '{question_key}'. "
-                        "All 10 binary evaluation questions must be explicitly answered."
-                    )
-                })
+                raise serializers.ValidationError(
+                    {
+                        field_name: (
+                            f"Missing mandatory DCYN indicator: '{question_key}'. "
+                            "All 10 binary evaluation questions must be explicitly answered."
+                        )
+                    }
+                )
 
             try:
                 attrs[field_name] = DCYNTransformer.to_boolean(field_name, raw_val)
@@ -233,12 +241,14 @@ class StudentOnboardingSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({field_name: str(err)})
 
         if not attrs.get("dcyn_parental_data_processing_consent_granted", False):
-            raise serializers.ValidationError({
-                "dcyn_parental_data_processing_consent_granted": (
-                    "Legal compliance failure: Parental data processing consent "
-                    "must be affirmatively granted (TRUE)."
-                )
-            })
+            raise serializers.ValidationError(
+                {
+                    "dcyn_parental_data_processing_consent_granted": (
+                        "Legal compliance failure: Parental data processing consent "
+                        "must be affirmatively granted (TRUE)."
+                    )
+                }
+            )
 
         digest_input = json.dumps(
             {k: str(v) for k, v in attrs.items() if not k.startswith("_")},

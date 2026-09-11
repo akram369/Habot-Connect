@@ -7,11 +7,11 @@
 # ==============================================================================
 
 import logging
+
+from onboarding.serializers import StudentOnboardingSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from onboarding.serializers import StudentOnboardingSerializer
 
 logger = logging.getLogger("habotconnect.onboarding")
 
@@ -76,8 +76,10 @@ class HealthCheckView(APIView):
     """Simple health check endpoint for container probes."""
 
     def get(self, request):
-        return Response({
-            "service": "habotconnect-onboarding-service",
-            "status": "HEALTHY",
-            "poka_yoke_build_gate": "ENFORCED",
-        })
+        return Response(
+            {
+                "service": "habotconnect-onboarding-service",
+                "status": "HEALTHY",
+                "poka_yoke_build_gate": "ENFORCED",
+            }
+        )

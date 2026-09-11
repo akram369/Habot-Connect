@@ -20,7 +20,7 @@ if not SECRET_KEY:
         or "pytest" in sys.modules
         or os.getenv("ENVIRONMENT") in ("testing", "development")
     ):
-        SECRET_KEY = "temporary-ci-testing-key-never-used-in-production"
+        SECRET_KEY = os.getenv("DJANGO_CI_KEY", "ci-testing-key-for-automated-validation")
     else:
         raise RuntimeError(
             "CRITICAL SECURITY VIOLATION: DJANGO_SECRET_KEY environment variable is missing. "

@@ -6,6 +6,7 @@
 # ==============================================================================
 
 import datetime
+
 import pytest
 from django.utils import timezone
 from onboarding.serializers import StudentOnboardingSerializer
@@ -99,9 +100,7 @@ class TestStudentOnboardingSerializer:
 
     def test_rejection_of_future_date_of_birth(self, valid_onboarding_payload):
         today = timezone.now().date()
-        valid_onboarding_payload["date_of_birth"] = (
-            today + datetime.timedelta(days=1)
-        ).isoformat()
+        valid_onboarding_payload["date_of_birth"] = (today + datetime.timedelta(days=1)).isoformat()
 
         serializer = StudentOnboardingSerializer(data=valid_onboarding_payload)
         assert not serializer.is_valid()
@@ -118,9 +117,9 @@ class TestStudentOnboardingSerializer:
 
     def test_rejection_of_duplicate_emergency_contact(self, valid_onboarding_payload):
         """Emergency contact cannot be the same persona as the primary parent."""
-        valid_onboarding_payload["emergency_contact_full_name"] = (
-            valid_onboarding_payload["parent_full_name"]
-        )
+        valid_onboarding_payload["emergency_contact_full_name"] = valid_onboarding_payload[
+            "parent_full_name"
+        ]
 
         serializer = StudentOnboardingSerializer(data=valid_onboarding_payload)
         assert not serializer.is_valid()

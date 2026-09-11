@@ -33,18 +33,26 @@ class DCYNTransformer:
     Eliminates all human discretion, assumptions, and fuzzy states.
     """
 
-    TRUTHY_STRING_LITERALS: Final[FrozenSet[str]] = frozenset({
-        "true", "yes", "y", "1"
-    })
+    TRUTHY_STRING_LITERALS: Final[FrozenSet[str]] = frozenset({"true", "yes", "y", "1"})
 
-    FALSY_STRING_LITERALS: Final[FrozenSet[str]] = frozenset({
-        "false", "no", "n", "0"
-    })
+    FALSY_STRING_LITERALS: Final[FrozenSet[str]] = frozenset({"false", "no", "n", "0"})
 
-    EXPLICITLY_PROHIBITED_AMBIGUOUS_VALUES: Final[FrozenSet[str]] = frozenset({
-        "maybe", "partially", "sometimes", "unknown", "undecided",
-        "n/a", "na", "null", "none", "pending", "unclear", "inapplicable",
-    })
+    EXPLICITLY_PROHIBITED_AMBIGUOUS_VALUES: Final[FrozenSet[str]] = frozenset(
+        {
+            "maybe",
+            "partially",
+            "sometimes",
+            "unknown",
+            "undecided",
+            "n/a",
+            "na",
+            "null",
+            "none",
+            "pending",
+            "unclear",
+            "inapplicable",
+        }
+    )
 
     @classmethod
     def _parse_string(cls, field_name: str, raw_value: str) -> bool:
