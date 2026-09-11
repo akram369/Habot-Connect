@@ -1,0 +1,224 @@
+# ==============================================================================
+# Habot Connect FZCO — Automated Poka-Yoke CI/CD Build Gate
+# Pipeline: GitHub Actions Fail-Closed Quality & Security Inspection
+# Candidate: Shaik Akram | +91 6302806015 | akramshaik1512@gmail.com
+# Profile: https://www.linkedin.com/in/shaik-akram08/ | https://github.com/akram369
+# Date: September 2026
+# ==============================================================================
+
+name: Poka-Yoke Automated Fail-Closed Build Gate
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - release/*
+  pull_request:
+    branches:
+      - main
+      - staging
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Gate 1: Static Secret Detection (Fail-Closed Hard Barrier)
+  # ----------------------------------------------------------------------------
+  secret-detection-gate:
+    name: "Gate 1: Static Secret & Credential Leakage Scanner"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Execute Gitleaks Secret Detection Scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: true
+          GITLEAKS_ENABLE_SUMMARY: true
+
+      - name: Fail-Closed Secret Verification Guard
+        if: failure()
+        run: |
+          echo "::error title=SECURITY ALERT::Raw API credentials, private cryptographic keys, or hardcoded tokens were detected in application code."
+          echo "Enforcing Golden Rule: Zero tolerance for unencrypted secrets in git revision history."
+          exit 1
+
+  # ----------------------------------------------------------------------------
+  # Gate 2: Code Quality, Formatting & Static Style Linter
+  # ----------------------------------------------------------------------------
+  code-quality-and-formatting-gate:
+    name: "Gate 2: Python Code Formatting & Strict Linting"
+    needs: [secret-detection-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Linting & Formatting Tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install black isort flake8
+
+      - name: Enforce Deterministic Code Formatting (Black)
+        run: |
+          black --check --diff backend/
+
+      - name: Enforce Import Ordering & Cleanliness (isort)
+        run: |
+          isort --check-only --diff backend/
+
+      - name: Enforce Structural Discipline Linting (Flake8)
+        run: |
+          flake8 backend/ --config=.flake8 --count --show-source --statistics
+
+  # ----------------------------------------------------------------------------
+  # Gate 3: Static Application Security Testing (SAST) & Dependency Auditing
+  # ----------------------------------------------------------------------------
+  security-and-vulnerability-gate:
+    name: "Gate 3: Application Security Testing & Vulnerability Audit"
+    needs: [code-quality-and-formatting-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Security Auditing Tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit pip-audit
+
+      - name: Execute Static AST Security Analysis (Bandit)
+        run: |
+          bandit -r backend/ -ll -ii -v
+
+      - name: Execute Dependency Vulnerability Audit (pip-audit)
+        run: |
+          pip install -r backend/requirements.txt
+          pip-audit --requirement backend/requirements.txt --strict
+
+  # ----------------------------------------------------------------------------
+  # Gate 4: Infrastructure as Code (IaC) Validation & Security Gate
+  # ----------------------------------------------------------------------------
+  terraform-infrastructure-gate:
+    name: "Gate 4: Terraform Syntax, Linting & Security Scan"
+    needs: [code-quality-and-formatting-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup HashiCorp Terraform CLI
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.7"
+
+      - name: Enforce Canonical Terraform Formatting (terraform fmt)
+        run: |
+          terraform -chdir=terraform fmt -check -diff
+
+      - name: Initialize Terraform Provider Plugins
+        run: |
+          terraform -chdir=terraform init -backend=false
+
+      - name: Validate Terraform Syntax & Semantic Integrity
+        run: |
+          terraform -chdir=terraform validate
+
+      - name: Execute Infrastructure Security Audit (Tfsec)
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: terraform
+          soft_fail: false
+
+  # ----------------------------------------------------------------------------
+  # Gate 5: Automated Unit Tests, DCYN Validation & Regression Suite
+  # ----------------------------------------------------------------------------
+  test-and-validation-gate:
+    name: "Gate 5: DCYN Logic & DRF Serializer Boundary Test Suite"
+    needs: [security-and-vulnerability-gate, terraform-infrastructure-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Application Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install pytest pytest-django pytest-cov
+
+      - name: Execute Full Pytest Test Suite
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+          SECRET_KEY: "temporary-ci-testing-key-never-used-in-production"
+          ENVIRONMENT: "testing"
+        run: |
+          pytest backend/onboarding/tests/ -v --cov=backend/onboarding --cov-report=term-missing --cov-fail-under=90
+
+  # ----------------------------------------------------------------------------
+  # Gate 6: Quarantine & Fail-Closed Incident Handler
+  # Triggered strictly when ANY preceding gate fails
+  # ----------------------------------------------------------------------------
+  quarantine-incident-handler:
+    name: "Fail-Closed: Quarantine & Incident Notification"
+    if: failure()
+    needs: [secret-detection-gate, code-quality-and-formatting-gate, security-and-vulnerability-gate, terraform-infrastructure-gate, test-and-validation-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log Security & Compliance Quarantine Incident
+        run: |
+          echo "================================================================================"
+          echo "POKA-YOKE FAIL-CLOSED GATE TRIGGERED: BUILD QUARANTINED"
+          echo "================================================================================"
+          echo "Timestamp: $(date -u)"
+          echo "Commit Hash: ${{ github.sha }}"
+          echo "Author: ${{ github.actor }}"
+          echo "Branch/Ref: ${{ github.ref }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Status: REJECTED — DEPLOYMENT HALTED"
+          echo "Reason: A Golden Rule was violated (Security breach, lint error, or schema deviation)."
+          echo "Action: Artifact packaging aborted. Downstream deployments permanently blocked."
+          echo "================================================================================"
+          exit 1
+
+  # ----------------------------------------------------------------------------
+  # Gate 7: Production/Staging Promotion Authorization
+  # ----------------------------------------------------------------------------
+  authorized-deployment-promotion:
+    name: "Success: Pipeline Clearance & Artifact Promotion"
+    if: success()
+    needs: [test-and-validation-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm Golden Rules Verification
+        run: |
+          echo "All Poka-Yoke build gates successfully passed with 100% compliance."
+          echo "Zero unencrypted secrets detected."
+          echo "Zero formatting deviations."
+          echo "100% DCYN validation and schema tests passed."
+          echo "Authorized for deployment to HabotConnect Staging Environment."

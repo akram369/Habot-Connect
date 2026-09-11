@@ -1,0 +1,51 @@
+# ==============================================================================
+# Habot Connect FZCO — Git Ignore Specification
+# ==============================================================================
+
+# Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# SQLite & Local Databases
+*.sqlite3
+*.sqlite3-journal
+staging_habotconnect.sqlite3
+backend/staging_habotconnect.sqlite3
+
+# Testing & Linting Caches
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Terraform Local State & Directories
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Environment & Secrets (Fail-Closed)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# IDE & OS Specific
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

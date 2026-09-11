@@ -1,0 +1,34 @@
+# ==============================================================================
+# Habot Connect FZCO — Gitleaks Secret Detection Rules Configuration
+# Candidate: Shaik Akram | +91 6302806015 | akramshaik1512@gmail.com
+# ==============================================================================
+
+title = "HabotConnect Poka-Yoke Secret Detection Configuration"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "google-cloud-service-account-private-key"
+description = "Detected Google Cloud Platform Service Account JSON Private Key block."
+regex = '''(?i)"type":\s*"service_account"'''
+tags = ["gcp", "secret", "critical"]
+
+[[rules]]
+id = "generic-api-secret-key-token"
+description = "Detected unencrypted API Key or hardcoded secret token."
+regex = '''(?i)(api[_-]?key|secret[_-]?key|auth[_-]?token|access[_-]?token|private[_-]?key)\s*[:=]\s*['"][0-9a-zA-Z\-_]{20,}['"]'''
+tags = ["secret", "credential", "critical"]
+
+[[rules]]
+id = "django-secret-key-assignment"
+description = "Detected hardcoded Django SECRET_KEY in source files."
+regex = '''(?i)SECRET_KEY\s*=\s*['"][a-zA-Z0-9!@#$%^&*()_+\-=\[\]{}|;:,.<>?]{30,}['"]'''
+tags = ["django", "secret", "critical"]
+
+[allowlist]
+description = "Permitted allowlists for non-secret test references"
+paths = [
+    '''tests/sample_insecure_payload_secret\.json''',
+    '''backend/onboarding/tests/test_poka_yoke_gate\.py'''
+]

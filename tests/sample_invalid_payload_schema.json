@@ -1,0 +1,24 @@
+{
+  "student_full_name": "Invalid Student Name 123",
+  "date_of_birth": "2025-01-01",
+  "parent_full_name": "Parent Name",
+  "parent_email_address": "unverified-user@mailinator.com",
+  "parent_phone_number": "0501234567",
+  "emergency_contact_full_name": "Parent Name",
+  "emergency_contact_phone_number": "0501234567",
+  "primary_learning_support_category": "UNKNOWN_CATEGORY",
+  "assigned_learning_support_assistant_identifier": "not-an-email",
+  "regional_jurisdiction": "INVALID_REGION",
+  "dcyn_indicators": {
+    "has_prior_formal_diagnosis": "maybe",
+    "requires_one_on_one_support": "sometimes",
+    "has_individualized_education_plan": "unclear",
+    "requires_non_verbal_communication_assistance": "n/a",
+    "has_physical_mobility_assistance_needs": "unknown",
+    "is_independently_toilet_trained": "partially",
+    "has_sensory_sensitivity_triggers": "undecided",
+    "parental_data_processing_consent_granted": "no",
+    "emergency_medical_action_plan_available": "pending",
+    "transportation_assistance_required": "null"
+  }
+}

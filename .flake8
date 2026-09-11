@@ -1,0 +1,21 @@
+# ==============================================================================
+# Habot Connect FZCO — Flake8 Linter Configuration
+# Candidate: Shaik Akram | +91 6302806015 | akramshaik1512@gmail.com
+# ==============================================================================
+
+[flake8]
+max-line-length = 100
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    *.egg-info,
+    venv,
+    .venv,
+    migrations
+extend-ignore = E203, W503
+max-complexity = 10
+show-source = True
+statistics = True
+count = True

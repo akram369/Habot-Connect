@@ -1,0 +1,24 @@
+{
+  "student_full_name": "Tariq Mansoor Al-Hashemi",
+  "date_of_birth": "2018-03-15",
+  "parent_full_name": "Mansoor Al-Hashemi",
+  "parent_email_address": "mansoor.alhashemi@example.ae",
+  "parent_phone_number": "+971501234567",
+  "emergency_contact_full_name": "Fatima Al-Hashemi",
+  "emergency_contact_phone_number": "+971509876543",
+  "primary_learning_support_category": "AUTISM_SPECTRUM_DISORDER",
+  "assigned_learning_support_assistant_identifier": "sarah.jenkins@habotconnect.internal",
+  "regional_jurisdiction": "DUBAI",
+  "dcyn_indicators": {
+    "has_prior_formal_diagnosis": "yes",
+    "requires_one_on_one_support": "1",
+    "has_individualized_education_plan": "true",
+    "requires_non_verbal_communication_assistance": "no",
+    "has_physical_mobility_assistance_needs": "0",
+    "is_independently_toilet_trained": "true",
+    "has_sensory_sensitivity_triggers": "YES",
+    "parental_data_processing_consent_granted": "TRUE",
+    "emergency_medical_action_plan_available": "yes",
+    "transportation_assistance_required": "no"
+  }
+}
